@@ -1,4 +1,4 @@
-# stellar-real-time-chat
+# stellar-real-time-chat/collaboration-platform
 
-A Chat application
-this is just to test , we will update this later
+A Chat web-application
+this is just to test , we will update this later .
