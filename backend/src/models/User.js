@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+
 const userSchema = new mongoose.Schema(
   {
     fullName: {
@@ -14,7 +15,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlenght: 6,
+      minlength: 6,
     },
     bio: {
       type: String,
@@ -33,7 +34,7 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
     location: {
-      type: "String",
+      type: String,
       default: "",
     },
     isOnboarded: {
@@ -49,11 +50,10 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-//pre hook
+
 userSchema.pre("save", async function (next) {
-  if (!this.isMofified("password")) {
-    return next();
-  }
+  if (!this.isModified("password")) return next();
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
