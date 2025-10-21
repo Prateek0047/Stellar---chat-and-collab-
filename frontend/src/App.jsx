@@ -11,6 +11,7 @@ import {
 } from "./pages/SignUpPage.jsx";
 
 const App = () => {
+  // tanstack query
   return (
     <div className="h-screen" data-theme="luxury">
       <button onClick={() => toast.success("Hello World")}>
