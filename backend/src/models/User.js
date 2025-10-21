@@ -1,5 +1,5 @@
-import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -64,10 +64,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  const isPasswordCorrect = await bcrypt.compare(
-    enteredPassword,
-    this.password
-  );
+  const isPasswordCorrect = await bcrypt.compare(enteredPassword, this.password);
   return isPasswordCorrect;
 };
 
