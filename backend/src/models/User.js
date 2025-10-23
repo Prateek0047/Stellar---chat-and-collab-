@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // NEW FIELD FOR EMAIL VERIFICATION
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
     friends: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -64,7 +69,10 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  const isPasswordCorrect = await bcrypt.compare(enteredPassword, this.password);
+  const isPasswordCorrect = await bcrypt.compare(
+    enteredPassword,
+    this.password
+  );
   return isPasswordCorrect;
 };
 
