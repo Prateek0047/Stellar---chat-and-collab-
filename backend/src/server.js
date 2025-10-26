@@ -4,11 +4,12 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
 import helmet from "helmet";
+import session from "express-session"; // 👈 ADD
+import passport from "./lib/passport.js"; // 👈 ADD
 
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import chatRoutes from "./routes/chat.route.js";
-
 import { connectDB } from "./lib/db.js";
 import { syncStreamUsers } from "./lib/scripts/syncStreamUsers.js";
 
@@ -16,15 +17,29 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const __dirname = path.resolve();
 
+// ------------------ SESSION & PASSPORT ------------------
+app.use(
+  session({
+    secret: process.env.JWT_SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    },
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
 // ------------------ SECURITY (Helmet) ------------------
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-
         scriptSrc: ["'self'", "'unsafe-eval'", "'unsafe-inline'"],
-
         connectSrc: [
           "'self'",
           "wss:",
@@ -33,17 +48,16 @@ app.use(
           "turn:",
           "https://*.stream-io-api.com",
           "https://*.getstream.io",
+          "https://accounts.google.com", // 👈 ADD for Google OAuth
         ],
-
         imgSrc: [
           "'self'",
           "data:",
           "https://flagcdn.com",
           "https://avatar.iran.liara.run",
+          "https://*.googleusercontent.com", // 👈 ADD
         ],
-
         styleSrc: ["'self'", "'unsafe-inline'"],
-
         mediaSrc: ["'self'", "blob:"],
         frameSrc: ["'self'"],
       },
@@ -55,7 +69,7 @@ app.use(
 app.use(
   cors({
     origin: "http://localhost:5173",
-    credentials: true, // ✅ must stay true for cookies
+    credentials: true,
   })
 );
 
@@ -81,11 +95,12 @@ const startServer = async () => {
   try {
     await connectDB();
     console.log("✅ MongoDB connected");
-
     if (process.env.NODE_ENV !== "production") {
-      await syncStreamUsers(process.env.STREAM_API_KEY, process.env.STREAM_API_SECRET);
+      await syncStreamUsers(
+        process.env.STREAM_API_KEY,
+        process.env.STREAM_API_SECRET
+      );
     }
-
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });

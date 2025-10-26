@@ -7,6 +7,7 @@ import {
   signup,
   verifyEmail,
 } from "../../../backend/src/lib/api.js";
+import { FcGoogle } from "react-icons/fc";
 
 const SignUpPage = () => {
   const queryClient = useQueryClient();
@@ -280,6 +281,18 @@ const SignUpPage = () => {
                     ) : (
                       "Create Account"
                     )}
+                  </button>
+                  <div className="divider">OR</div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      (window.location.href =
+                        "http://localhost:5001/api/auth/google")
+                    }
+                    className="btn btn-outline w-full flex items-center justify-center gap-2"
+                  >
+                    <FcGoogle className="size-5" />
+                    Sign up with Google
                   </button>
 
                   <div className="text-center mt-4">
