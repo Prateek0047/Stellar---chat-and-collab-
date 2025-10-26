@@ -11,6 +11,7 @@ import {
   generateDeviceFingerprint,
   getDeviceInfo,
 } from "../../../backend/src/lib/deviceFingerprint";
+import { FcGoogle } from "react-icons/fc";
 
 const LoginPage = () => {
   const queryClient = useQueryClient();
@@ -273,6 +274,19 @@ const LoginPage = () => {
                       ) : (
                         "Sign In"
                       )}
+                    </button>
+
+                    <div className="divider">OR</div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        (window.location.href =
+                          "http://localhost:5001/api/auth/google")
+                      }
+                      className="btn btn-outline w-full flex items-center justify-center gap-2"
+                    >
+                      <FcGoogle className="size-5" />
+                      Continue with Google
                     </button>
 
                     <div className="text-center mt-4">
