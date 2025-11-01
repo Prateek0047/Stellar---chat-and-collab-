@@ -1,17 +1,17 @@
-import express from "express";
-import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import path from "path";
+import "dotenv/config";
+import express from "express";
+import session from "express-session";
 import helmet from "helmet";
-import session from "express-session"; // 👈 ADD
-import passport from "./lib/passport.js"; // 👈 ADD
+import path from "path";
+import passport from "./lib/passport.js";
 
-import authRoutes from "./routes/auth.route.js";
-import userRoutes from "./routes/user.route.js";
-import chatRoutes from "./routes/chat.route.js";
 import { connectDB } from "./lib/db.js";
 import { syncStreamUsers } from "./lib/scripts/syncStreamUsers.js";
+import authRoutes from "./routes/auth.route.js";
+import chatRoutes from "./routes/chat.route.js";
+import userRoutes from "./routes/user.route.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -44,31 +44,39 @@ app.use(
           "'self'",
           "wss:",
           "https:",
+          "http://localhost:*",
+          "http://stellar-backend:5001",
           "stun:",
           "turn:",
           "https://*.stream-io-api.com",
           "https://*.getstream.io",
-          "https://accounts.google.com", // 👈 ADD for Google OAuth
+          "https://accounts.google.com",
         ],
         imgSrc: [
           "'self'",
           "data:",
           "https://flagcdn.com",
           "https://avatar.iran.liara.run",
-          "https://*.googleusercontent.com", // 👈 ADD
+          "https://*.googleusercontent.com",
         ],
         styleSrc: ["'self'", "'unsafe-inline'"],
         mediaSrc: ["'self'", "blob:"],
-        frameSrc: ["'self'"],
+        frameSrc: ["'self'", "https://accounts.google.com"],
       },
     },
   })
 );
 
-// ------------------ CORS ------------------
+// ------------------ CORS (FIXED FOR DOCKER) ------------------
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost",
+      "http://localhost:80",
+      "http://localhost:5173", // Vite dev server
+      "http://stellar-frontend",
+      "http://stellar-frontend:80",
+    ],
     credentials: true,
   })
 );
@@ -82,26 +90,23 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 
-// ------------------ FRONTEND ------------------
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-  });
-}
+// Note: Frontend is served by nginx in Docker, not by Express
 
 // ------------------ SERVER STARTUP ------------------
 const startServer = async () => {
   try {
     await connectDB();
     console.log("✅ MongoDB connected");
+
+    // Only sync in development
     if (process.env.NODE_ENV !== "production") {
       await syncStreamUsers(
         process.env.STREAM_API_KEY,
         process.env.STREAM_API_SECRET
       );
     }
-    app.listen(PORT, () => {
+
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (err) {

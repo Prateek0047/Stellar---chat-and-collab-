@@ -1,17 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { FcGoogle } from "react-icons/fc";
 import { Link } from "react-router-dom";
-import {
-  login,
-  resendOTP,
-  verifyDeviceOTP,
-} from "../../../backend/src/lib/api";
+import { login, resendOTP, verifyDeviceOTP } from "../lib/api.js";
 import {
   generateDeviceFingerprint,
   getDeviceInfo,
-} from "../../../backend/src/lib/deviceFingerprint";
-import { FcGoogle } from "react-icons/fc";
+} from "../lib/deviceFingerprint.js";
 
 const LoginPage = () => {
   const queryClient = useQueryClient();
@@ -280,8 +276,7 @@ const LoginPage = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        (window.location.href =
-                          "http://localhost:5001/api/auth/google")
+                        (window.location.href = "/api/auth/google")
                       }
                       className="btn btn-outline w-full flex items-center justify-center gap-2"
                     >

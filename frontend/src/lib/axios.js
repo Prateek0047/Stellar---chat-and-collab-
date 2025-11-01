@@ -1,8 +1,11 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001/api" : "/api";
+// Use relative URLs - nginx will proxy to backend
+const BASE_URL = "/api";
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true, // send cookies with the request
+  withCredentials: true,
 });
+
+console.log("🔗 API Base URL:", BASE_URL);

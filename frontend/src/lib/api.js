@@ -55,7 +55,9 @@ export async function getFriendRequests() {
 }
 
 export async function acceptFriendRequest(requestId) {
-  const response = await axiosInstance.put(`/users/friend-request/${requestId}/accept`);
+  const response = await axiosInstance.put(
+    `/users/friend-request/${requestId}/accept`
+  );
   return response.data;
 }
 
@@ -63,3 +65,38 @@ export async function getStreamToken() {
   const response = await axiosInstance.get("/chat/token");
   return response.data;
 }
+
+// Add these to your existing api.js file
+
+export const verifyEmail = async ({ email, otp }) => {
+  const response = await axiosInstance.post("/auth/verify-email", {
+    email,
+    otp,
+  });
+  return response.data;
+};
+
+export const verifyDeviceOTP = async ({
+  email,
+  otp,
+  deviceFingerprint,
+  deviceInfo,
+  rememberDevice,
+}) => {
+  const response = await axiosInstance.post("/auth/verify-device", {
+    email,
+    otp,
+    deviceFingerprint,
+    deviceInfo,
+    rememberDevice,
+  });
+  return response.data;
+};
+
+export const resendOTP = async ({ email, type }) => {
+  const response = await axiosInstance.post("/auth/resend-otp", {
+    email,
+    type,
+  });
+  return response.data;
+};
