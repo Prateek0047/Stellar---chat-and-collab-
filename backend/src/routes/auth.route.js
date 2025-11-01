@@ -1,6 +1,5 @@
 // backend/src/routes/auth.route.js
 import express from "express";
-import passport from "../lib/passport.js"; // Make sure this exists
 import jwt from "jsonwebtoken"; // ✅ Add this at the top
 import {
   login,
@@ -11,6 +10,7 @@ import {
   verifyDeviceOTP,
   verifyEmail,
 } from "../controllers/auth.controller.js";
+import passport from "../lib/passport.js"; // Make sure this exists
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -34,7 +34,6 @@ router.get(
     failureRedirect: "/login",
   }),
   (req, res) => {
-    // ✅ Use imported `jwt`, not `require`
     const token = jwt.sign(
       { userId: req.user._id },
       process.env.JWT_SECRET_KEY,
@@ -44,15 +43,14 @@ router.get(
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "lax", // Change from "strict" to "lax" for OAuth
       secure: process.env.NODE_ENV === "production",
     });
 
     const redirectUrl = req.user.isOnboarded ? "/" : "/onboarding";
-    const frontendUrl =
-      process.env.NODE_ENV === "production" ? "" : "http://localhost:5173";
 
-    res.redirect(`${frontendUrl}${redirectUrl}`);
+    // In Docker, just redirect to relative path
+    res.redirect(redirectUrl);
   }
 );
 

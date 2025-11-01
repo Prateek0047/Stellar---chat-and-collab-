@@ -1,13 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  resendOTP,
-  signup,
-  verifyEmail,
-} from "../../../backend/src/lib/api.js";
 import { FcGoogle } from "react-icons/fc";
+import { Link } from "react-router-dom";
+import { resendOTP, signup, verifyEmail } from "../lib/api.js";
 
 const SignUpPage = () => {
   const queryClient = useQueryClient();
