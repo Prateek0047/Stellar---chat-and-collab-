@@ -1,4 +1,19 @@
-# Logs
+# ============================================
+# ENVIRONMENT VARIABLES (CRITICAL - NEVER COMMIT!)
+# ============================================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.*.local
+backend/.env
+frontend/.env
+**/.env
+
+# ============================================
+# LOGS
+# ============================================
 logs
 *.log
 npm-debug.log*
@@ -7,20 +22,114 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ============================================
+# DEPENDENCIES
+# ============================================
 node_modules
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# ============================================
+# BUILD OUTPUTS
+# ============================================
 dist
 dist-ssr
+build
 *.local
+.next
+out
 
-# Editor directories and files
+# ============================================
+# TESTING
+# ============================================
+coverage
+*.lcov
+.nyc_output
+
+# ============================================
+# CACHE & TEMP FILES
+# ============================================
+.cache
+.parcel-cache
+.npm
+.eslintcache
+.node_repl_history
+*.tsbuildinfo
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ============================================
+# EDITOR & IDE
+# ============================================
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# ============================================
+# OS FILES
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ============================================
+# MISC
+# ============================================
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.firebase/
+.vercel
 
-.env
+# ============================================
+# DOCKER
+# ============================================
+docker-compose.override.yml
+.dockerignore
+
+# ============================================
+# SENSITIVE FILES (NEVER COMMIT!)
+# ============================================
+*.pem
+*.key
+*.cert
+*.crt
+.ssh/
+secrets/
+private/
+
+# ============================================
+# DATABASE
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================
+# OPTIONAL: UNCOMMENT IF NEEDED
+# ============================================
+# package-lock.json  # Uncomment if using yarn exclusively
+# yarn.lock          # Uncomment if using npm exclusively
