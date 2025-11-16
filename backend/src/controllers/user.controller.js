@@ -1,6 +1,6 @@
-import User from "../models/User.js";
+import { upsertStreamUser } from "../lib/stream.js";
 import FriendRequest from "../models/FriendRequest.js";
-
+import User from "../models/User.js";
 export async function getRecommendedUsers(req, res) {
   try {
     const currentUserId = req.user.id;
@@ -24,7 +24,10 @@ export async function getMyFriends(req, res) {
   try {
     const user = await User.findById(req.user.id)
       .select("friends")
-      .populate("friends", "fullName profilePic nativeLanguage learningLanguage");
+      .populate(
+        "friends",
+        "fullName profilePic nativeLanguage learningLanguage"
+      );
 
     res.status(200).json(user.friends);
   } catch (error) {
@@ -40,7 +43,9 @@ export async function sendFriendRequest(req, res) {
 
     // prevent sending req to yourself
     if (myId === recipientId) {
-      return res.status(400).json({ message: "You can't send friend request to yourself" });
+      return res
+        .status(400)
+        .json({ message: "You can't send friend request to yourself" });
     }
 
     const recipient = await User.findById(recipientId);
@@ -50,7 +55,9 @@ export async function sendFriendRequest(req, res) {
 
     // check if user is already friends
     if (recipient.friends.includes(myId)) {
-      return res.status(400).json({ message: "You are already friends with this user" });
+      return res
+        .status(400)
+        .json({ message: "You are already friends with this user" });
     }
 
     // check if a req already exists
@@ -62,9 +69,9 @@ export async function sendFriendRequest(req, res) {
     });
 
     if (existingRequest) {
-      return res
-        .status(400)
-        .json({ message: "A friend request already exists between you and this user" });
+      return res.status(400).json({
+        message: "A friend request already exists between you and this user",
+      });
     }
 
     const friendRequest = await FriendRequest.create({
@@ -91,7 +98,9 @@ export async function acceptFriendRequest(req, res) {
 
     // Verify the current user is the recipient
     if (friendRequest.recipient.toString() !== req.user.id) {
-      return res.status(403).json({ message: "You are not authorized to accept this request" });
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to accept this request" });
     }
 
     friendRequest.status = "accepted";
@@ -119,7 +128,10 @@ export async function getFriendRequests(req, res) {
     const incomingReqs = await FriendRequest.find({
       recipient: req.user.id,
       status: "pending",
-    }).populate("sender", "fullName profilePic nativeLanguage learningLanguage");
+    }).populate(
+      "sender",
+      "fullName profilePic nativeLanguage learningLanguage"
+    );
 
     const acceptedReqs = await FriendRequest.find({
       sender: req.user.id,
@@ -138,11 +150,71 @@ export async function getOutgoingFriendReqs(req, res) {
     const outgoingRequests = await FriendRequest.find({
       sender: req.user.id,
       status: "pending",
-    }).populate("recipient", "fullName profilePic nativeLanguage learningLanguage");
+    }).populate(
+      "recipient",
+      "fullName profilePic nativeLanguage learningLanguage"
+    );
 
     res.status(200).json(outgoingRequests);
   } catch (error) {
     console.log("Error in getOutgoingFriendReqs controller", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+export async function updateUserProfile(req, res) {
+  try {
+    const userId = req.user.id;
+    const {
+      fullName,
+      bio,
+      nativeLanguage,
+      learningLanguage,
+      location,
+      profilePic,
+    } = req.body;
+
+    // Validate required fields
+    if (!fullName) {
+      return res.status(400).json({ message: "Full name is required" });
+    }
+
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        fullName,
+        bio: bio || "",
+        nativeLanguage,
+        learningLanguage,
+        location: location || "",
+        profilePic: profilePic || "",
+      },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update Stream user if profile pic or name changed
+    try {
+      await upsertStreamUser({
+        id: updatedUser._id.toString(),
+        name: updatedUser.fullName,
+        image: updatedUser.profilePic || "",
+      });
+      console.log(`Stream user updated for ${updatedUser.fullName}`);
+    } catch (streamError) {
+      console.log("Error updating Stream user:", streamError.message);
+    }
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser,
+      message: "Profile updated successfully",
+    });
+  } catch (error) {
+    console.error("Error in updateUserProfile controller", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }

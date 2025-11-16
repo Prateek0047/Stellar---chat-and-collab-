@@ -281,10 +281,13 @@ const SignUpPage = () => {
                   <div className="divider">OR</div>
                   <button
                     type="button"
-                    onClick={() =>
-                      (window.location.href =
-                        "http://localhost:5001/api/auth/google")
-                    }
+                    onClick={() => {
+                      const apiUrl =
+                        import.meta.env.MODE === "development"
+                          ? "http://localhost:5001/api/auth/google"
+                          : "/api/auth/google";
+                      window.location.href = apiUrl;
+                    }}
                     className="btn btn-outline w-full flex items-center justify-center gap-2"
                   >
                     <FcGoogle className="size-5" />

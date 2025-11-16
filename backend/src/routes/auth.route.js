@@ -1,6 +1,6 @@
 // backend/src/routes/auth.route.js
 import express from "express";
-import jwt from "jsonwebtoken"; // ✅ Add this at the top
+import jwt from "jsonwebtoken";
 import {
   login,
   logout,
@@ -10,7 +10,7 @@ import {
   verifyDeviceOTP,
   verifyEmail,
 } from "../controllers/auth.controller.js";
-import passport from "../lib/passport.js"; // Make sure this exists
+import passport from "../lib/passport.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -34,23 +34,36 @@ router.get(
     failureRedirect: "/login",
   }),
   (req, res) => {
-    const token = jwt.sign(
-      { userId: req.user._id },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "7d" }
-    );
+    try {
+      // Generate JWT token
+      const token = jwt.sign(
+        { userId: req.user._id },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: "7d" }
+      );
 
-    res.cookie("jwt", token, {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-      sameSite: "lax", // Change from "strict" to "lax" for OAuth
-      secure: process.env.NODE_ENV === "production",
-    });
+      // Set cookie
+      res.cookie("jwt", token, {
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === "production" ? "lax" : "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
 
-    const redirectUrl = req.user.isOnboarded ? "/" : "/onboarding";
+      // Determine redirect URL based on onboarding status
+      const redirectUrl = req.user.isOnboarded ? "/" : "/onboarding";
 
-    // In Docker, just redirect to relative path
-    res.redirect(redirectUrl);
+      // For development (Vite dev server)
+      if (process.env.NODE_ENV !== "production") {
+        return res.redirect(`http://localhost:5173${redirectUrl}`);
+      }
+
+      // For production (Docker/nginx)
+      return res.redirect(redirectUrl);
+    } catch (error) {
+      console.error("Google OAuth callback error:", error);
+      res.redirect("/login?error=auth_failed");
+    }
   }
 );
 

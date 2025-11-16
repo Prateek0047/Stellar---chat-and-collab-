@@ -100,3 +100,7 @@ export const resendOTP = async ({ email, type }) => {
   });
   return response.data;
 };
+export const updateUserProfile = async (userData) => {
+  const response = await axiosInstance.put("/users/profile", userData);
+  return response.data;
+};
